@@ -1,0 +1,18 @@
+{
+  "name": "wfm",
+  "version": "1.0.0",
+  "description": "Web-flavoured Markdown to use for building websites without new functionalities, without the use of HTML.",
+  "main": "index.js",
+  "repository": "https://github.com/TheCodeHeist/wfm.git",
+  "author": "Md. Riyasat Hossain <riyasat.hossain.29@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "dev": "ts-node index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.10",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.2"
+  }
+}
