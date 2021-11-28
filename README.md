@@ -12,7 +12,7 @@ Make sure you watch this project if you fork it, to get the latest pushes!
 
 Please leave a star!! ⭐ 
 
-## **Instructions for forking the project**
+### **Instructions for forking the project**
 
 1. Go to the project's [github](https://github.com/TheCodeHeist/wfm) page.
 2. Click on the **Watch** and **Fork** buttons on the top-right corner.
