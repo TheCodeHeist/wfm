@@ -1,6 +1,6 @@
 # **wfm**
 
-> **Update!** Lexer can recognize Headings
+> **Update!** Lexer can recognize Headings, Paragraphs and Links ✨✨
 
 **Web-flavoured Markdown (wfm)** to use for building websites with new functionalities, without the use of HTML.
 
