@@ -1,20 +1,14 @@
 // Token
-export interface Token {
+export interface Tokens {
   fileData: string;
+  frontMatter: any;
   lines: string[];
   linesNumber: number;
   tokens: Object[];
 }
 
-// Heading
-export interface Heading {
-  isHeading: boolean;
-  level?: number;
-  token?: HeadingToken;
-}
-
-export interface HeadingToken {
+export interface Token {
   type: string;
   rawData: string;
-  data: string;
+  data: string | object;
 }

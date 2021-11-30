@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
-import { Token, Heading } from "./../interfaces/TokenInterfaces";
+import { Tokens, Token } from "./../interfaces/TokenInterfaces";
+import matter from "gray-matter";
 
 class Lexer {
   filePath: string;
@@ -10,44 +11,58 @@ class Lexer {
     this.filePath = filePath;
     this.markdown = fs.readFileSync(path.join(process.cwd(), filePath), "utf8");
 
-    console.log(this.returnTokens());
+    if (this.markdown === "") {
+      console.log("File is empty!");
+
+      process.exit(1);
+    }
   }
 
   returnTokens() {
     let tokens = {
       fileData: this.markdown,
+      frontMatter: this.getFrontMatter(),
       lines: this.markdown.split("\n"),
       linesNumber: this.markdown.split("\n").length,
       tokens: [],
-    } as Token;
+    } as Tokens;
 
     let lines = this.getEachLine();
 
     for (let i = 0; i < lines.length; i++) {
-      if (this.getHeadingToken(lines[i]).isHeading) {
-        tokens.tokens.push(this.getHeadingToken(lines[i]).token || {});
+      if (lines[i].startsWith("#")) {
+        tokens.tokens.push(this.getHeadingToken(lines[i]));
+      } else if (lines[i].startsWith("[")) {
+        tokens.tokens.push(this.getLinkToken(lines[i]));
       } else {
-        break;
+        tokens.tokens.push(this.getParagraphToken(lines[i]));
       }
     }
 
     return tokens;
   }
 
+  getFrontMatter() {
+    let frontMatter = matter(this.markdown);
+    return frontMatter;
+  }
+
   getEachLine(): string[] {
-    let lines: string[] = this.markdown.split("\n");
+    let lines: string[] = this.getFrontMatter().content.split("\n");
 
     for (let i = 0; i < lines.length; i++) {
       lines[i] = lines[i].trim();
     }
 
     for (let i = 0; i < lines.length; i++) {
+      // remove empty lines
       if (lines[i] === "") {
         lines.splice(i, 1);
       }
     }
 
     for (let i = 0; i < lines.length; i++) {
+      // remove comments
       if (lines[i].startsWith("<!--") && lines[i].endsWith("-->")) {
         lines.splice(i, 1);
       }
@@ -63,11 +78,18 @@ class Lexer {
       }
     }
 
+    for (let i = 0; i < lines.length; i++) {
+      // remove empty lines
+      if (lines[i] === "") {
+        lines.splice(i, 1);
+      }
+    }
+
     return lines;
   }
 
-  getHeadingToken(lineParam: string): Heading {
-    let callback = {} as Heading;
+  getHeadingToken(lineParam: string): Token {
+    let callback = {} as Token;
 
     let line = lineParam;
 
@@ -80,71 +102,78 @@ class Lexer {
         tempLine = tempLine.substring(1);
       }
 
-      callback.isHeading = true;
-      callback.level = level;
-      callback.token = {
-        type: "h" + callback.level,
-        rawData: line,
-        data: line.substring(callback.level).trim(),
-      };
+      callback.type = "h" + level;
+      callback.rawData = line;
+      callback.data = line.substring(level).trim();
     } else {
-      callback.isHeading = false;
+      callback.type = "null";
     }
 
     return callback;
+  }
 
-    // let headingTokens: Array<HeadingToken> = [];
-    // let lines = this.getEachLine();
-    // for (let i = 0; i < lines.length; i++) {
-    //   if (lines[i].startsWith("#")) {
-    //     if (lines[i].startsWith("# ")) {
-    //       headingTokens.push({
-    //         type: "h1",
-    //         rawData: lines[i],
-    //         data: lines[i].substring(2),
-    //       } as HeadingToken);
-    //     } else if (lines[i].startsWith("## ")) {
-    //       headingTokens.push({
-    //         type: "h2",
-    //         rawData: lines[i],
-    //         data: lines[i].substring(3),
-    //       } as HeadingToken);
-    //     } else if (lines[i].startsWith("### ")) {
-    //       headingTokens.push({
-    //         type: "h3",
-    //         rawData: lines[i],
-    //         data: lines[i].substring(4),
-    //       } as HeadingToken);
-    //     } else if (lines[i].startsWith("#### ")) {
-    //       headingTokens.push({
-    //         type: "h4",
-    //         rawData: lines[i],
-    //         data: lines[i].substring(5),
-    //       } as HeadingToken);
-    //     } else if (lines[i].startsWith("##### ")) {
-    //       headingTokens.push({
-    //         type: "h5",
-    //         rawData: lines[i],
-    //         data: lines[i].substring(6),
-    //       } as HeadingToken);
-    //     } else if (lines[i].startsWith("###### ")) {
-    //       headingTokens.push({
-    //         type: "h6",
-    //         rawData: lines[i],
-    //         data: lines[i].substring(7),
-    //       } as HeadingToken);
-    //     } else {
-    //       headingTokens.push({
-    //         type: "error",
-    //         rawData: lines[i],
-    //         data: lines[i],
-    //       } as HeadingToken);
-    //     }
-    //   } else {
-    //     break;
-    //   }
-    // }
-    // return headingTokens;
+  getParagraphToken(lineParam: string): Token {
+    let callback = {} as Token;
+
+    let line = lineParam;
+
+    if (!line.startsWith("#")) {
+      callback.type = "p";
+      callback.rawData = line;
+      callback.data = line.trim();
+    } else {
+      callback.type = "null";
+    }
+
+    return callback;
+  }
+
+  getLinkToken(lineParam: string): Token {
+    let callback = {} as Token;
+
+    let line = lineParam;
+
+    if (line.startsWith("[")) {
+      let tempLine = line;
+
+      tempLine = tempLine.substring(1);
+
+      let linkName = "";
+      let linkUrl = "";
+
+      let i = 0;
+
+      while (tempLine[i] !== "]") {
+        linkName += tempLine[i];
+        i++;
+      }
+
+      i++;
+
+      if (tempLine[i] === "(") {
+        i++;
+        while (tempLine[i] !== ")") {
+          linkUrl += tempLine[i];
+          i++;
+        }
+      } else {
+        while (tempLine[i] !== " ") {
+          linkUrl += tempLine[i];
+          i++;
+        }
+      }
+
+      callback.type = "a";
+      callback.rawData = line;
+      callback.data = {
+        name: linkName,
+        url: linkUrl,
+      };
+    } else {
+      callback.type = "null";
+    }
+
+    return callback;
   }
 }
 

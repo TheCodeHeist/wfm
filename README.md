@@ -2,7 +2,7 @@
 
 > **Update!** Lexer can recognize Headings
 
-**Web-flavoured Markdown (wfm)** to use for building websites without new functionalities, without the use of HTML.
+**Web-flavoured Markdown (wfm)** to use for building websites with new functionalities, without the use of HTML.
 
 **wfm** will get all the features from a traditional markdown flavour like **gfm (Github-flavoured Markdown)** but some extra-features added to it, which aren't in traditional **gfm**. Thus, markdown will not only be used as a static blog generator, but also a relatively easier alternative for **HTML**.
 
