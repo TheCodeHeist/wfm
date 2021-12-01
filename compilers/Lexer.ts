@@ -6,6 +6,9 @@ import matter from "gray-matter";
 class Lexer {
   filePath: string;
   markdown: string;
+  codeblock_state: boolean = false;
+  codeblock_state_lang: string | null = "";
+  codeblock_state_code: string = "";
 
   constructor(filePath: string) {
     this.filePath = filePath;
@@ -34,6 +37,28 @@ class Lexer {
         tokens.tokens.push(this.getHeadingToken(lines[i]));
       } else if (lines[i].startsWith("[")) {
         tokens.tokens.push(this.getLinkToken(lines[i]));
+      } else if (lines[i].startsWith("```")) {
+        this.getCodeBlockToken(lines[i]);
+
+        while (this.codeblock_state) {
+          i++;
+          this.getCodeBlockToken(lines[i]);
+        }
+
+        this.codeblock_state_code = this.codeblock_state_code.substring(1);
+        this.codeblock_state_code = this.codeblock_state_code.substring(
+          0,
+          this.codeblock_state_code.length - 1
+        );
+
+        tokens.tokens.push({
+          type: "code_block",
+          rawData: lines[i],
+          data: {
+            lang: this.codeblock_state_lang,
+            code: this.codeblock_state_code,
+          },
+        });
       } else {
         tokens.tokens.push(this.getParagraphToken(lines[i]));
       }
@@ -175,6 +200,39 @@ class Lexer {
 
     return callback;
   }
+
+  getCodeBlockToken(lineParam: string): void {
+    let line = lineParam;
+    let tempLine = line;
+
+    if (line.startsWith("```")) {
+      if (tempLine === "```") {
+        tempLine = tempLine.substring(3);
+
+        this.codeblock_state = true;
+      } else {
+        tempLine = tempLine.substring(3);
+
+        this.codeblock_state_lang = tempLine;
+
+        this.codeblock_state = true;
+
+        tempLine = "";
+      }
+    }
+
+    this.codeblock_state_code += tempLine + "\n";
+
+    if (line.endsWith("```")) {
+      this.codeblock_state = false;
+    }
+
+    return;
+  }
 }
+
+// let result = new Lexer("./markdowns/test.md").returnTokens();
+
+// console.log(result.tokens[result.tokens.length - 2]);
 
 export default Lexer;

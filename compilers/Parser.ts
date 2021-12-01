@@ -1,12 +1,14 @@
 import { Tokens } from "./../interfaces/TokenInterfaces";
 import fs from "fs";
 import path from "path";
+import hljs from "highlight.js/lib/common";
 
 let template: string;
 
 class Parser {
   lexerResults: Tokens;
   outputPath: string;
+  codeBlockAvailable: boolean = false;
 
   constructor(lexerResults: Tokens, outputPath: string) {
     this.lexerResults = lexerResults;
@@ -29,20 +31,25 @@ class Parser {
     let allStyles = "";
     let allScripts = "";
 
+    if (this.codeBlockAvailable) {
+      allStyles += `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js/styles/default.min.css">\n`;
+      allStyles += `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js/styles/github.css">\n`;
+      // allStyles += `<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/prettify.css">\n`;
+    }
+    // if (this.codeBlockAvailable) {
+    //   allScripts += `<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>\n`;
+    //   allScripts += `<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/prettify.js"></script>\n`;
+    // }
     if (styles !== "") {
       styles.forEach((style: string) => {
         allStyles += `<link rel="stylesheet" href="${style}">\n`;
       });
-    } else {
-      allStyles = "";
     }
 
     if (scripts !== "") {
       scripts.forEach((script: string) => {
         allScripts += `<script src="${script}"></script>\n`;
       });
-    } else {
-      allScripts = "";
     }
 
     template = `
@@ -79,6 +86,14 @@ ${allScripts}
         )}>\n`;
       } else if (token.type === "a") {
         body += `<a href="${token.data.url}">${token.data.name}</a>\n`;
+      } else if (token.type === "code_block") {
+        body += `<pre class="prettyprint">${
+          hljs.highlight(token.data.code, {
+            language: token.data.lang,
+          }).value
+        }</pre>\n`;
+
+        this.codeBlockAvailable = true;
       }
     });
 

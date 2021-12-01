@@ -6,8 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hello World!</title>
-<link rel="stylesheet" href="./main.css">
-<link rel="stylesheet" href="./reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js/styles/default.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js/styles/github.css">
 
 </head>
 <body>
@@ -21,11 +21,30 @@
 <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p>
 <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p>
 <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p>
+<pre class="prettyprint"><span class="hljs-keyword">let</span> tokens = {
+<span class="hljs-attr">fileData</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">markdown</span>,
+<span class="hljs-attr">frontMatter</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">getFrontMatter</span>(),
+<span class="hljs-attr">lines</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">markdown</span>.<span class="hljs-title function_">split</span>(<span class="hljs-string">&quot;\n&quot;</span>),
+<span class="hljs-attr">linesNumber</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">markdown</span>.<span class="hljs-title function_">split</span>(<span class="hljs-string">&quot;\n&quot;</span>).<span class="hljs-property">length</span>,
+<span class="hljs-attr">tokens</span>: [],
+} <span class="hljs-keyword">as</span> <span class="hljs-title class_">Tokens</span>;
+<span class="hljs-keyword">let</span> lines = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">getEachLine</span>();
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; lines.<span class="hljs-property">length</span>; i++) {
+<span class="hljs-keyword">if</span> (lines[i].<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&quot;#&quot;</span>)) {
+tokens.<span class="hljs-property">tokens</span>.<span class="hljs-title function_">push</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">getHeadingToken</span>(lines[i]));
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (lines[i].<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&quot;[&quot;</span>)) {
+tokens.<span class="hljs-property">tokens</span>.<span class="hljs-title function_">push</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">getLinkToken</span>(lines[i]));
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (lines[i].<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&quot;```&quot;</span>)) {
+tokens.<span class="hljs-property">tokens</span>.<span class="hljs-title function_">push</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">getCodeBlockToken</span>(lines[i]));
+} <span class="hljs-keyword">else</span> {
+tokens.<span class="hljs-property">tokens</span>.<span class="hljs-title function_">push</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">getParagraphToken</span>(lines[i]));
+}
+}
+<span class="hljs-keyword">return</span> tokens;
+</pre>
 <a href="../index.ts">index.ts</a>
 
 
-<script src="./app.js"></script>
-<script src="./menu.js"></script>
 
 </body>
 </html>
